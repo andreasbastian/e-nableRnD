@@ -5,11 +5,13 @@ Tritium is an experimental assistive device for those affected with ABS, symbrac
 
 The goal of this device is to fast-track the most impactful developments and ideas from the e-NABLE community into one device.  These features are as follows:
 
+- Opposable/bi-stable thumb to enable oppositional grasping
+- Two degrees of motion at the wrist (both flexion/extension and raiod-ulnar deviation)
+- No elastic cords
 - Metacarpal arch
 - Differential grasping capability
-- Two degrees of motion at the wrist (both flexion/extension and raiod-ulnar deviation)
-- Opposable/bi-stable thumb to enable oppositional grasping
-- No elastic cords
+- Print-in-place fingers
+- Three phalange fingers
 - No knots
 - Minimal supplemental hardware
 - Single-handed tightening/loosening of securing straps
