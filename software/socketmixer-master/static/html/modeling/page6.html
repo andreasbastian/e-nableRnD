@@ -1,0 +1,255 @@
+<div id="instructionSection">
+	<div style ="margin:20px">
+			<p>
+				In step 6... 
+				<br>
+				...you will attach a mounting point to the distal end of the socket. The connection between the socket and the mounting point will not only make the socket compatible with ICRC alignment hardware, but will offer an opportunity to do some preliminary alignment.
+			</p>
+			<p>Checklist:</p>
+			<ul>
+				<li>Select bottom of socket, where mounting point should be attached</li>
+				<li>Import mounting point</li>
+				<li>Position mounting point relative to socket, as necessary</li>
+				<li>Align socket in relation to mounting point, as necessary</li>
+				<li>Cut away external layer of socket</li>
+				<li>Merge socket and mounting point together</li>
+			</ul>	
+			<br>
+			<br>	
+		
+			<div class ="subControl">
+	<!-- 			step 1 -->
+				<div  id="wellText" class="panel panel-default" style="display: none;">
+					<div class="panel-body">
+
+	                    <div id="subText1"  class="subText" acceptDisabled=1>
+	                        <h3>Start Mounting Point Attachment Process</h3>
+	                        <hr>
+                            <p>In the following steps, you will attach a mounting point to the distal end of the socket.<p>
+	                    </div>
+
+                        <div id="subText2" acceptdisabled=1 apifuncstart="$.post('api/beginSelection()',apiReturnParser);" class="subText" style="display: none;">
+                            <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                            <h3>Select Area</h3>
+                            <hr>
+                            <p>
+                                Using the selection tool that is now active, mark the region on the bottom of the socket
+                                where the mounting point should be attached.
+                            <p>
+                        </div>
+                        <div id="subText3" apifunc="loadconnector()" class="subText" style="display: none;">
+                            <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                            <h3>Select Connector</h3>
+                            <hr>
+                            <p>
+                                Now, select the appropriate connector. If you are using the ICRC system, choose "socket.obj." Press "Accept" to import the model.
+                            <p>
+                                <div class="btn-group">
+                                    <button id="connectorSelector" type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle" onclick=populatemodels()>Connector Models <span class="caret"></span></button>
+                                    <ul class="dropdown-menu" id="connectorModels"></ul>
+                                </div>
+
+                        </div>
+						<div  id="subText4"  apiFunc="$.post('api/cutSocketForConnection()',apiReturnParser);" class="subText" style="display: none;">
+							<div class = 'questionMarkPlaceHolder' align = 'right' helpPage= ''> </div>
+							<h3>Position Mounting Point</h3>
+							<hr>
+                            <p>If the mounting point is positioned correctly relative to the socket, continue to the next step. Otherwise, use the arrows 
+                                to move the mounting point to an appropriate position. Make sure the distal end of the socket does not overlap through the mounting point.
+                                When positioned appropriately the cutting plane will be low on the socket, just above the point where the socket begins to narrow. Cutting the socket too low can result in a bad connection between the socket and the connector.
+                            <p>
+						</div>
+                        <div id="subText5" apifunc="$.post('api/joinConnectionToSocket()',apiReturnParser);" class="subText" style="display: none;">
+                            <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                            <h3>Join socket for connector</h3>
+                            <hr>
+                            <p>
+                                If the mounting point is positioned correctly relative to the socket, continue to the next step. Otherwise, use the arrows
+                                to move the mounting point to an appropriate position. Make sure the distal end of the socket does not overlap through the mounting point.
+                            <p>
+                        </div>
+                        <div id="subText6" apifuncstart="shownElement.find('input[type=range]').each(function() { $(this).change()})" class="subText" style="display: none;" acceptdisabled=1>
+                            <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                            <h3>Smooth Join</h3>
+                            <hr>
+                            <p>
+                                Select the area around the join, click on expand to expand the join by 10-20%.
+                            <p>
+                                <div id="page11SelectTool"> </div>
+                                <script>
+                                    $(document).ready(function () {
+                                        $('#page11SelectTool').html(Mustache.to_html(template, SelectValuesTrimLine));
+                                    });
+                                </script>
+                                <button class='btn btn-default btn-sm' onclick="$.post('api/contractByOneRing()', apiReturnParser);">Contract --</button>
+                                <button class='btn btn-default btn-sm' onclick="$.post('api/expandByOneRing()', apiReturnParser);">Expand ++</button>
+
+                        </div>
+
+                        <div id="subText7" apifunc=" callAccept();" class="subText" style="display: none;" >
+                            <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                            <h3>Smooth Scale</h3>
+                            <hr>
+                            <div id="page6ScaleSmooth"> </div>
+                            <script>
+                                $(document).ready(function () {
+                                    $('#page6ScaleSmooth').html(Mustache.to_html(template, SmoothValuesScale));
+                                });
+                            </script>
+                        </div>
+                      
+                        <div id="subText8" class="subText" style="display: none;" acceptdisabled=1>
+                            <h3>Finished </h3>
+                        </div>
+					</div>
+					<div class="panel-footer "> 
+						<div id="page7TemplateControls"> </div>
+					</div>
+                    <script>
+                    $( document ).ready(function() {
+                      $('#page7TemplateControls').html(Mustache.to_html(subControlTemplate, subControlValuesPage7));
+                    });
+                    </script>
+				</div>
+
+				<a id = "activateButton" class="btn btn-info " role="button">
+					 <span class="glyphicon glyphicon-wrench"></span>Attach Mounting Point
+				</a>
+				
+			</div> <!-- subcontrol div -->
+            <br />
+            Now, make a hole for the alignment screw.
+            <br />
+        <br />
+            <div class="subControl">
+            <!-- 			step 1 -->
+            <div id="wellText" class="panel panel-default" style="display: none;">
+                <div class="panel-body">
+
+                    <div id="subText1" class="subText" acceptdisabled=1>
+                        <h3>Start Hole Creation Process</h3>
+                        <hr>
+                        <p>
+                            This step makes a small hole in the bottom of the socket, which is used to access the alignment screw."
+                            in "Import Hole Maker" add "In this step, a narrow cylinder will be imported.
+                        <p>
+                    </div>
+
+                    <div id="subText2" apifunc=$.post("api/importHoleMaker('holemakerv2.obj')",renameHoleMaker); class="subText" style="display: none;">
+                        <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                        <h3>Import hole maker</h3>
+                        <hr>
+                        <p>
+                            In this step, a narrow cylinder will be imported. Using the selection tool that is now active, mark the region on the bottom of the socket
+                            where the mounting point should be attached. Press "Accept" to import the mounting point.
+                        <p>
+                    </div>
+                    <div id="subText3" apifunc=$.post('api/alignZCam(5)',apiReturnParser); class="subText" style="display: none;">
+                        <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                        <h3>Select bottom view</h3>
+                        <hr>
+                        <p>
+                            In this step we will switch to the bottom view of the socket.
+                        <p>
+                    </div>
+                    <div id="subText4" apifuncstart="$.post('api/alignTransform()',apiReturnParser);" apifunc="$.post('api/accept()',apiReturnParser);" class="subText" style="display: none;">
+                        <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                        <h3>Position Hole Maker</h3>
+                        <hr>
+                        <p>
+                            The cylinder should be positioned near the centre of the socket, and should appear to cut through both the distal end of the cup, and the proximal end of the connector.
+                        <p>
+                    </div>
+                    <div id="subText5" apifunc=$.post("api/boolean('socket','holemaker')",acceptBoolean); class="subText" style="display: none;">
+                        <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                        <h3>Boolean Hole Maker</h3>
+                        <hr>
+                        <p>
+                            In this step, the mass of the cylinder will be taken away from the mass of the socket. This operation is called a "boolean difference.
+                        <p>
+                    </div>
+                    
+                    <div id="subText6" apifuncstart="$.post('api/saveLatest()',apiReturnParser);"  class="subText" style="display: none;">
+                        <h3>Finished </h3>
+                    </div>
+                </div>
+                <div class="panel-footer ">
+                    <div id="page8TemplateControls"> </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        $('#page8TemplateControls').html(Mustache.to_html(subControlTemplate, subControlValuesPage72));
+                    });
+                </script>
+            </div>
+
+            <a id="activateButton" class="btn btn-info " role="button">
+                <span class="glyphicon glyphicon-wrench"></span>Create Hole
+            </a>
+
+        </div>
+			
+		
+	</div>
+
+</div>
+
+<script>
+    function acceptBooleanagain(data)
+    {
+        if (data == false) {
+            apiReturnParser(data)
+        }
+        $.post("api/accept()", apiReturnParser);
+    }
+
+    function acceptBoolean(data)
+    {
+        if (data == 'false') {
+            $.post("api/boolean('connector','holemaker')", acceptBooleanagain);
+            
+        }
+        else
+        {
+            $.post("api/accept()", apiReturnParser);
+        }
+        
+    }
+
+    var selectedConnector ='socket.obj'
+    function loadconnector()
+    {
+        debugger;
+        $.post("api/importConnectorAndPosition('" + selectedConnector + "')", apiReturnParser);
+    }
+    function parseResultmodels(data)
+    {
+        if (data == false) {
+            apiReturnParser(data)
+        }
+
+        json = $.parseJSON(data);
+        $('#connectorModels').empty()
+        $.each(json, function (index, value) {
+
+            insert = "<li ><a  onclick=selectedConnector='" + value + "';$('#connectorSelector').text('"+value+"')>" + value + "</a></li>"
+            $('#connectorModels').append(insert)
+        })
+
+    }
+    function populatemodels() {
+        $.post("api/checkAvaliableSocketModels()", parseResultmodels);
+      
+    }
+
+
+    function renameHoleMaker(data)
+    {
+
+        if (data == false) {
+            apiReturnParser(data)
+        }
+        $.post("api/renameObjectByName('holemakerv2.obj','holemaker')", apiReturnParser);
+    }
+
+</script>

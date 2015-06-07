@@ -1,0 +1,84 @@
+<div id="instructionSection">
+	<div style ="margin:20px">
+			<p>
+				In step 7... 
+				<br>
+				...you will smooth the trim line.  This step can be performed as many times as you want in order to increase the smoothness 
+                of the trim line.
+
+                
+			</p>
+			  
+			<br>	
+		
+			<div class ="subControl">
+	<!-- 			step 1 -->
+				<div  id="wellText" class="panel panel-default" style="display: none;">
+					<div class="panel-body">
+
+	                    <div id="subText1"  class="subText" acceptDisabled=1>
+	                        <h3>Trim Line Smoothing Process</h3>
+	                        <hr>
+                            <p>In the following steps, you will attach a mounting point to the distal end of the socket.<p>
+	                    </div>
+
+                        <div id="subText2" acceptdisabled=1 apifuncstart="$.post('api/beginSelection()',apiReturnParser);" class="subText" style="display: none;">
+                            <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                            <h3>Select Area</h3>
+                            <hr>
+                            <p>
+                                Select the top of the trim line by double-clicking on the flat, top surface of the socket. Use the ">" key on your keyboard to expand the area selected. Selecting a portion of the socket wall will allow for a smoother transition between the top of the socket and the trimline."
+                               
+                            <p>
+                            <div id="page7SelectTool"> </div>
+                            <script>
+                                $(document).ready(function () {
+                                    $('#page7SelectTool').html(Mustache.to_html(template, SelectValues));
+                                });
+
+                            </script>
+                            <button class='btn btn-default btn-sm' onclick="$.post('api/contractByOneRing()', apiReturnParser);">Contract --</button>
+                            <button class='btn btn-default btn-sm' onclick="$.post('api/expandByOneRing()', apiReturnParser);">Expand ++</button>
+                        </div>
+                        <div id="subText3" apifunc=callAccept() apifuncstart=$.post('api/smooth(0.5)',apiReturnParser); class="subText" style="display: none;">
+                            <div class='questionMarkPlaceHolder' align='right' helppage=''> </div>
+                            <h3>Smooth</h3>
+                            <hr>
+                            <p>
+                                Now, use the slider to adjust the smoothing of the trimline. Click "Accept" to smooth
+                            <p>
+                                <div id="page6Smooth"> </div>
+                                <script>
+                                    $(document).ready(function () {
+                                        $('#page6Smooth').html(Mustache.to_html(template, SmoothValues));
+                                    });
+
+                                </script>
+
+                        </div>
+                        <div id="subText4" class="subText" style="display: none;" acceptdisabled=1>
+                            <h3>Finished </h3>
+                        </div>
+					</div>
+					<div class="panel-footer "> 
+						<div id="page9TemplateControls"> </div>
+					</div>
+                    <script>
+                    $( document ).ready(function() {
+                        $('#page9TemplateControls').html(Mustache.to_html(subControlTemplate, subControlValuesPage8));
+                    });
+                    </script>
+				</div>
+
+				<a id = "activateButton" class="btn btn-info " role="button">
+					 <span class="glyphicon glyphicon-wrench"></span> Trim Line Smoothing
+				</a>
+				
+			</div> <!-- subcontrol div -->
+       <br />
+        <br />
+        Your socket is now complete. Save a .mix file by going to the "File" menu and selecting "Save As." Once you have saved your model, export it as a .obj by clicking "Export" in the "File" menu. Make sure you select "OBJ Format" as the file type.
+	</div>
+
+</div>
+
