@@ -12,21 +12,6 @@
 				overflow: hidden;
 			}
 
-			#info {
-				color: #fff;
-				position: absolute;
-				top: 10px;
-				width: 100%;
-				text-align: center;
-				z-index: 100;
-				display:block;
-
-			}
-
-			a { color: skyblue }
-			.button { background:#999; color:#eee; padding:0.2em 0.5em; cursor:pointer }
-			.highlight { background:orange; color:#fff; }
-
 			span {
 				display: inline-block;
 				width: 60px;
@@ -37,28 +22,23 @@
 		</style>
 	</head>
 	<body>
-		<div id="info">
-			<a href="http://threejs.org" target="_blank">three.js</a> -
-			STL loader test by <a href="https://github.com/aleeper">aleeper</a>. PR2 head from <a href="http://www.ros.org/wiki/pr2_description">www.ros.org</a>
-		</div>
 
 		<script src="js/lib/three.min.js"></script>
 
 		<script src="js/lib/STLLoader.js"></script>
 
 		<script src="js/lib/Detector.js"></script>
-		<script src="js/lib/stats.min.js"></script>
 
 		<script>
 
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
-			var container, stats;
+			var container;
 
 			var camera, cameraTarget, scene, renderer;
 
 			init();
-			animate();
+//			animate();
 
 			function init() {
 
@@ -170,15 +150,6 @@
 				renderer.shadowMap.cullFace = THREE.CullFaceBack;
 
 				container.appendChild( renderer.domElement );
-
-				// stats
-
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.top = '0px';
-				container.appendChild( stats.domElement );
-
-				//
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
