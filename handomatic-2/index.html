@@ -124,8 +124,8 @@
 			// Display some STLs
 			HandLoader.loadHand(specs.hand,specs.size,function(){
 				ga('ec:addProduct',GAObjectForSpecs(specs));
-				ga('ec:setAction', 'click',{
-					'step': 1            // A value of 1 indicates this action is first checkout step, "Preview Hand" in GA Config.
+				ga('ec:setAction', 'checkout',{
+					'step': 1
 				});
 				ga('send', {
 					hitType: 'event',
@@ -141,8 +141,8 @@
 
 		function downloadHand(){
 			ga('ec:addProduct',GAObjectForSpecs(specs));
-			ga('ec:setAction', 'purchase',{
-				'step': 2            // A value of 2 indicates this action is second checkout step, "Download Hand" in GA Config
+			ga('ec:setAction', 'checkout_option',{
+				'step': 2
 			});
 
 			HandLoader.getFiles(function(files){
