@@ -127,13 +127,7 @@
 				ga('ec:setAction', 'click',{
 					'step': 1            // A value of 1 indicates this action is first checkout step, "Preview Hand" in GA Config.
 				});
-				ga('send', {
-					hitType: 'event',
-					eventCategory: 'HandForge',
-					eventAction: 'preview',
-					eventLabel: window.location.host,
-					eventValue: specs.size
-				});
+				ga("send", "event", "HandForce", "preview", window.location.host,specs.size);
 
 				// Defined in setup.js
 				render();
@@ -145,15 +139,10 @@
 			ga('ec:setAction', 'purchase',{
 				'step': 2            // A value of 2 indicates this action is second checkout step, "Download Hand" in GA Config
 			});
-			ga('send', {
-				hitType: 'event',
-				eventCategory: 'HandForge',
-				eventAction: 'download',
-				eventLabel: window.location.host,
-				eventValue: specs.size
-			});
 
 			HandLoader.getFiles(function(files){
+				ga("send", "event", "HandForce", "download", window.location.host,specs.size);
+
 				HandZipper.zip(zipFileName(specs),files);
 			},function(errors){
 				var message = "Some of the files you requested were not available:\n";
