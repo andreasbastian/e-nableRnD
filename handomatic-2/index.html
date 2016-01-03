@@ -131,8 +131,7 @@
 					hitType: 'event',
 					eventCategory: 'HandForge',
 					eventAction: 'preview',
-					eventLabel: window.location.host,
-					eventValue: specs.size
+					eventLabel: window.location.host
 				});
 
 				// Defined in setup.js
@@ -145,15 +144,15 @@
 			ga('ec:setAction', 'purchase',{
 				'step': 2            // A value of 2 indicates this action is second checkout step, "Download Hand" in GA Config
 			});
-			ga('send', {
-				hitType: 'event',
-				eventCategory: 'HandForge',
-				eventAction: 'download',
-				eventLabel: window.location.host,
-				eventValue: specs.size
-			});
 
 			HandLoader.getFiles(function(files){
+				ga('send', {
+					hitType: 'event',
+					eventCategory: 'HandForge',
+					eventAction: 'download',
+					eventLabel: window.location.host
+				});
+
 				HandZipper.zip(zipFileName(specs),files);
 			},function(errors){
 				var message = "Some of the files you requested were not available:\n";
