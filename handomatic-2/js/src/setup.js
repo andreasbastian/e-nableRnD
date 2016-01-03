@@ -6,7 +6,7 @@ var container, controls;
 var camera, cameraTarget, scene, renderer;
 
 init();
-animate();
+//animate();
 
 function init() {
 
@@ -14,26 +14,9 @@ function init() {
     document.body.appendChild( container );
 
     camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 15000 );
-    camera.position.set( 0, 150, 0 );
+    camera.position.set( 300, 150, 300 );
 
     cameraTarget = new THREE.Vector3( 0, 0, 0 );
-
-    //// Trackball Controls
-    controls = new THREE.TrackballControls( camera );
-
-    controls.rotateSpeed = 1.0;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 0.8;
-
-    controls.noZoom = false;
-    controls.noPan = false;
-
-    controls.staticMoving = true;
-    controls.dynamicDampingFactor = 0.3;
-
-    controls.keys = [ 65, 83, 68 ];
-
-    controls.addEventListener( 'change', render );
 
     scene = new THREE.Scene();
 
@@ -44,7 +27,6 @@ function init() {
     addShadowedLight( 0.5, 1, -1, 0xffff99, 1 );
 
     // renderer
-
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setClearColor( 0xffffff );
     renderer.setPixelRatio( window.devicePixelRatio );
@@ -56,12 +38,17 @@ function init() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.cullFace = THREE.CullFaceBack;
 
-// Orbit Controls
-//    controls = new THREE.OrbitControls( camera, renderer.domElement );
-//    //controls.addEventListener( 'change', render ); // add this only if there is no animation loop (requestAnimationFrame)
-//    controls.enableDamping = true;
-//    controls.dampingFactor = 0.25;
-//    controls.enableZoom = false;
+    // Orbit Controls
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls.addEventListener( 'change', render ); // add this only if there is no animation loop (requestAnimationFrame)
+    controls.enablePan = true;
+    controls.target.set(0,0,0);
+    controls.minDistance = 100;
+    controls.enableZoom = true;
+
+    // Axis helper for my own reference
+    var axisHelper = new THREE.AxisHelper( 30 );
+    scene.add( axisHelper );
 
     container.appendChild( renderer.domElement );
 
@@ -69,7 +56,7 @@ function init() {
 
 
 
-    render();
+    //renderer.render();
 }
 
 function addShadowedLight( x, y, z, color, intensity ) {
@@ -106,23 +93,15 @@ function onWindowResize() {
 
 }
 
-function animate() {
-
-    requestAnimationFrame( animate );
-    controls.update();
-    render();
-
-}
-
 function render() {
-
-    var timer = Date.now() * 0.0001;
-
-    camera.position.x = Math.cos( timer ) * 500;
-    camera.position.z = Math.sin( timer ) * 500;
-
-    camera.lookAt( cameraTarget );
-
     renderer.render( scene, camera );
-
 }
+
+
+//function animate() {
+//
+//    requestAnimationFrame( animate );
+//    controls.update();
+//    render();
+//
+//}

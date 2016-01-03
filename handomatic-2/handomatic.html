@@ -25,16 +25,15 @@
 
 		<script src="js/lib/three.min.js" type="text/javascript"></script>
 		<script src="js/lib/zip/zip.js"></script>
-		<script src="js/lib/TrackballControls.js" type="text/javascript"></script>
+		<script src="js/lib/OrbitControls.js" type="text/javascript"></script>
 		<script src="js/lib/STLLoader.js" type="text/javascript"></script>
 		<script src="js/lib/Detector.js" type="text/javascript"></script>
         <script src="js/lib/underscore-min.js" type="text/javascript"></script>
 		<script src="js/src/setup.js" type="text/javascript"></script>
-		<script src="js/src/handloader.js" type="text/javascript"></script>
+		<script src="js/src/handLoader.js" type="text/javascript"></script>
+		<script src="js/src/handZipper.js" type="text/javascript"></script>
 
 		<script>
-			// Set up zip.js
-			zip.workerScriptsPath = "js/lib/zip/";
 
 			// Specify a hand:
 			var specs = {
@@ -42,136 +41,33 @@
 				size: 100
 			};
 
-			// Download some STLs
-			HandLoader.loadHand(specs.hand,specs.size);
-//			var HandBlobs = HandLoader.getBlobs();
+			// Display some STLs
+			HandLoader.loadHand(specs.hand,specs.size,function(arrayBuffers){
+				// Download those STLs in a zip file
 
-			// Zip 'em up for download:
-			(function(obj) {
+				// THREE.js sets the XHR "responseType" to "arraybuffer" (see STLLoader.js)
+				// To put these files in a zip archive we need blobs.
+				// Fortunately, support for 'new Blob()' is quite strong
+				// See http://caniuse.com/#search=Blob
+				var files = [{
+					name: "Palm_" + specs.hand + "_" + specs.size + ".stl",
+					blob: new Blob([arrayBuffers.palm], {type: "application/sla"})
+				},{
+					name: "Distal_" + specs.hand + "_" + specs.size + ".stl",
+					blob: new Blob([arrayBuffers.distal], {type: "application/sla"})
+				},{
+					name: "Proximal_" + specs.hand + "_" + specs.size + ".stl",
+					blob: new Blob([arrayBuffers.proximal], {type: "application/sla"})
+				}];
 
-				var requestFileSystem = obj.webkitRequestFileSystem || obj.mozRequestFileSystem || obj.requestFileSystem;
 
-				function onerror(message) {
-					alert(message);
-				}
+				var zipFileName = "HandForge_" + specs.hand + "_" + specs.size + ".zip";
+				HandZipper.zip(zipFileName,files);
 
-				function createTempFile(callback) {
-					var tmpFilename = "tmp.zip";
-					requestFileSystem(TEMPORARY, 4 * 1024 * 1024 * 1024, function(filesystem) {
-						function create() {
-							filesystem.root.getFile(tmpFilename, {
-								create : true
-							}, function(zipFile) {
-								callback(zipFile);
-							});
-						}
+				// Defined in setup.js
+				render();
 
-						filesystem.root.getFile(tmpFilename, null, function(entry) {
-							entry.remove(create, create);
-						}, create);
-					});
-				}
-
-				var model = (function() {
-					var zipFileEntry, zipWriter, writer, creationMethod, URL = obj.webkitURL || obj.mozURL || obj.URL;
-
-					return {
-						setCreationMethod : function(method) {
-							creationMethod = method;
-						},
-						addFiles : function addFiles(files, oninit, onadd, onprogress, onend) {
-							var addIndex = 0;
-
-							function nextFile() {
-								var file = files[addIndex];
-								onadd(file);
-								zipWriter.add(file.name, new zip.BlobReader(file.blob), function() {
-									addIndex++;
-									if (addIndex < files.length)
-										nextFile();
-									else
-										onend();
-								}, onprogress);
-							}
-
-							function createZipWriter() {
-								zip.createWriter(writer, function(writer) {
-									zipWriter = writer;
-									oninit();
-									nextFile();
-								}, onerror);
-							}
-
-							if (zipWriter)
-								nextFile();
-							else if (creationMethod == "Blob") {
-								writer = new zip.BlobWriter();
-								createZipWriter();
-							} else {
-								createTempFile(function(fileEntry) {
-									zipFileEntry = fileEntry;
-									writer = new zip.FileWriter(zipFileEntry);
-									createZipWriter();
-								});
-							}
-						},
-						getBlobURL : function(callback) {
-							zipWriter.close(function(blob) {
-								var blobURL = creationMethod == "Blob" ? URL.createObjectURL(blob) : zipFileEntry.toURL();
-								callback(blobURL);
-								zipWriter = null;
-							});
-						},
-						getBlob : function(callback) {
-							zipWriter.close(callback);
-						}
-					};
-				})();
-
-				setTimeout(function(){
-					var HandBlobs = HandLoader.getBlobs();
-					model.setCreationMethod("Blob");
-
-					// THREE.js sets the XHR "responseType" to "arraybuffer" (see STLLoader.js)
-					// To put these files in a zip archive we need blobs.
-					// Fortunately, support for 'new Blob()' is quite strong
-					// See http://caniuse.com/#search=Blob
-					var files = [{
-						name: "Palm_" + specs.hand + "_" + specs.size + ".stl",
-						blob: new Blob([HandBlobs.palm], {type: "application/sla"})
-					},{
-						name: "Distal_" + specs.hand + "_" + specs.size + ".stl",
-						blob: new Blob([HandBlobs.distal], {type: "application/sla"})
-					},{
-						name: "Proximal_" + specs.hand + "_" + specs.size + ".stl",
-						blob: new Blob([HandBlobs.proximal], {type: "application/sla"})
-					}];
-
-					model.addFiles(files,function(){},function(){},function(){},function(){});
-
-					// wait 3s, then download
-					setTimeout(function(){
-						if (typeof navigator.msSaveBlob == "function") {
-							model.getBlob(function(blob) {
-								navigator.msSaveBlob(blob, filenameInput.value);
-							});
-						} else {
-							model.getBlobURL(function(blobURL) {
-								var clickEvent;
-								clickEvent = document.createEvent("MouseEvent");
-								clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-								var downloadButton = document.createElement("a");
-								downloadButton.href = blobURL;
-								downloadButton.download = "HandForge_" + specs.hand + "_" + specs.size + ".zip";
-								document.body.appendChild(downloadButton);
-								downloadButton.dispatchEvent(clickEvent);
-
-							});
-							return false;
-						}
-					},3000);
-				},3000);
-			})(this);
+			});
 
 		</script>
 	</body>

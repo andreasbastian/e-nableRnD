@@ -32,7 +32,7 @@ var HandLoader = (function(){
         return new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
     }
 
-    function loadPalm(filename,offset,rotation){
+    function loadPalm(filename,offset,rotation,cb){
         var loader = new THREE.STLLoader();
         loader.load( filename, function ( geometry, data ) {
             // Store for later download in a zip file. XHR is the only way to retrieve
@@ -46,11 +46,11 @@ var HandLoader = (function(){
             mesh.position.set(offset.x,offset.y,offset.z);
             scene.add( mesh );
 
-            render();
+            if (cb) cb(data);
         } );
     }
 
-    function loadKnuckles(fileName,spacingX,offset,rotation,whichKnuckle){
+    function loadKnuckles(fileName,spacingX,offset,rotation,whichKnuckle,cb){
         var loader = new THREE.STLLoader();
         loader.load( fileName, function ( geometry, data ) {
             // Store for later download in a zip file. XHR is the only way to retrieve
@@ -72,31 +72,42 @@ var HandLoader = (function(){
                 scene.add(proximalNext);
             }
 
-            render();
+            if (cb) cb(data);
         } );
     }
 
+    var partsLoaded = 0,
+        totalParts = 3
+        handLoadedCallback = function(){},
+        completionCheck = function(){
+            partsLoaded++;
+            if (partsLoaded === totalParts){
+                handLoadedCallback(blobsForDownload)
+            } else {
+                // Still waiting for parts to come back
+            }
+        };
+
     return {
-        getBlobs : function(){
-            return blobsForDownload;
-        },
-        loadHand : function(hand,size){
+        loadHand : function(hand,size,cb){
+            blobsForDownload = {};
+            handLoadedCallback = cb;
             var fileNames = generateFileNames(hand,size);
 
             // load palm
             var palmrotation = new THREE.Euler( -Math.PI / 2, Math.PI,Math.PI, 'XYZ' );
             var offsetPalm = new THREE.Vector3(25,0,-120);
-            loadPalm(fileNames.palm,offsetPalm,palmrotation);
+            loadPalm(fileNames.palm,offsetPalm,palmrotation,completionCheck);
 
             // load proximals
             var rotationProximal = new THREE.Euler( -Math.PI / 2, Math.PI,0, 'XYZ' );
             var offsetProximal = new THREE.Vector3(0,0,-10);
-            loadKnuckles(fileNames.proximal,15,offsetProximal,rotationProximal, "proximal");
+            loadKnuckles(fileNames.proximal,15,offsetProximal,rotationProximal, "proximal",completionCheck);
 
             // load distals
             var rotationDistal = new THREE.Euler( Math.PI / 2, Math.PI , Math.PI / 2, 'XYZ' );
             var offsetDistal = new THREE.Vector3(-3,0,10);
-            loadKnuckles(fileNames.distal,15,offsetDistal,rotationDistal,"distal");
+            loadKnuckles(fileNames.distal,15,offsetDistal,rotationDistal,"distal",completionCheck);
 
             return fileNames;
         }
