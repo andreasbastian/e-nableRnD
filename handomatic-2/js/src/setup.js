@@ -97,6 +97,16 @@ function render() {
     renderer.render( scene, camera );
 }
 
+function clearScene(){
+    // Don't mutate while removing
+    _.each(_.clone(scene.children),function(child){
+        if (child.type == "Mesh") {
+            scene.remove(child);
+        }
+    });
+
+    render();
+}
 
 //function animate() {
 //

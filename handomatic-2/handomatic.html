@@ -4,71 +4,114 @@
 		<title>three.js webgl - STL</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				font-family: Monospace;
-				background-color: #000000;
-				margin: 0px;
-				overflow: hidden;
-			}
 
-			span {
-				display: inline-block;
-				width: 60px;
-				float: left;
-				text-align: center;
-			}
 
-		</style>
+		<link rel="stylesheet" type="text/css" href="js/lib/jquery-ui-1.11.4.custom/jquery-ui.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/main.css" />
+		<link rel="stylesheet" type="text/css" href="css/flatslider.css" />
+
+
+
 	</head>
 	<body>
 
-		<script src="js/lib/three.min.js" type="text/javascript"></script>
-		<script src="js/lib/zip/zip.js"></script>
-		<script src="js/lib/OrbitControls.js" type="text/javascript"></script>
-		<script src="js/lib/STLLoader.js" type="text/javascript"></script>
-		<script src="js/lib/Detector.js" type="text/javascript"></script>
-        <script src="js/lib/underscore-min.js" type="text/javascript"></script>
-		<script src="js/src/setup.js" type="text/javascript"></script>
-		<script src="js/src/handLoader.js" type="text/javascript"></script>
-		<script src="js/src/handZipper.js" type="text/javascript"></script>
+	<script src="js/lib/three.min.js" type="text/javascript"></script>
+	<script src="js/lib/jquery-2.1.4.min.js" type="text/javascript"></script>
+	<script src="js/lib/jquery-ui-1.11.4.custom/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="js/lib/zip/zip.js"></script>
+	<script src="js/lib/OrbitControls.js" type="text/javascript"></script>
+	<script src="js/lib/STLLoader.js" type="text/javascript"></script>
+	<script src="js/lib/Detector.js" type="text/javascript"></script>
+	<script src="js/lib/underscore-min.js" type="text/javascript"></script>
+	<script src="js/src/setup.js" type="text/javascript"></script>
+	<script src="js/src/handLoader.js" type="text/javascript"></script>
+	<script src="js/src/handZipper.js" type="text/javascript"></script>
 
-		<script>
+	<div id="configuratorPanel">
 
-			// Specify a hand:
-			var specs = {
+		<span class="title">Configure A Hand</span>
+		<div class="handedness">
+			<img class="hand-graphic" src="img/left.png"  data-selectedhand="LL" />
+			<img class="hand-graphic selected" src="img/right.png" data-selectedhand="RR" />
+
+		</div>
+		<div class="sizing">
+			<h5 id="sizeFeedback">Size: 100%</h5>
+			<div class="flat-slider" id="flat-slider"></div>
+		</div>
+		<div class="download-container">
+			<a href="#" class="downloadBtn" >Download</a>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		// Specify an initial hand... this will load before jquery!
+		var specs = {
 				hand: "RR",
 				size: 100
 			};
+		updateHand();
 
-			// Display some STLs
-			HandLoader.loadHand(specs.hand,specs.size,function(arrayBuffers){
-				// Download those STLs in a zip file
-
-				// THREE.js sets the XHR "responseType" to "arraybuffer" (see STLLoader.js)
-				// To put these files in a zip archive we need blobs.
-				// Fortunately, support for 'new Blob()' is quite strong
-				// See http://caniuse.com/#search=Blob
-				var files = [{
-					name: "Palm_" + specs.hand + "_" + specs.size + ".stl",
-					blob: new Blob([arrayBuffers.palm], {type: "application/sla"})
-				},{
-					name: "Distal_" + specs.hand + "_" + specs.size + ".stl",
-					blob: new Blob([arrayBuffers.distal], {type: "application/sla"})
-				},{
-					name: "Proximal_" + specs.hand + "_" + specs.size + ".stl",
-					blob: new Blob([arrayBuffers.proximal], {type: "application/sla"})
-				}];
-
-
-				var zipFileName = "HandForge_" + specs.hand + "_" + specs.size + ".zip";
-//				HandZipper.zip(zipFileName,files);
-
-				// Defined in setup.js
-				render();
-
+		$(document).ready(function(){
+			// Size Slider
+			$('#flat-slider').slider({
+				orientation: 'horizontal',
+				range:       false,
+				value:      specs.size,
+				min: 100,
+				max: 200,
+				step: 10,
+				slide: function( event, ui ) {
+					$( "#sizeFeedback" ).text( "Size: " + ui.value + "%" );
+				},
+				stop: function( event, ui) {
+					specs.size = ui.value;
+					updateHand();
+				}
 			});
 
-		</script>
+			// Hand Selector
+			var $handSelectors = $('.hand-graphic');
+			$handSelectors.click(function(){
+				$handSelectors.removeClass("selected");
+				$(this).addClass("selected");
+				specs.hand = $(this).data("selectedhand");
+				updateHand();
+			});
+
+			// Download Button
+			$('.downloadBtn').click(function(e){
+				e.preventDefault();
+				downloadHand();
+			});
+		});
+
+		function zipFileName(specs){
+			return "HandForge_" + specs.hand + "_" + specs.size + ".zip";
+		}
+
+		function updateHand(){
+			// Remove any prior hand that was there
+			clearScene();
+
+			// Display some STLs
+			HandLoader.loadHand(specs.hand,specs.size,function(){
+				// Defined in setup.js
+				render();
+			});
+		}
+
+		function downloadHand(){
+			HandLoader.getFiles(function(files){
+				HandZipper.zip(zipFileName(specs),files);
+			},function(errors){
+				var message = "Some of the files you requested were not available:\n";
+				_.each(errors,function(e){
+					message += "\n" +e;
+				});
+				alert(message);
+			});
+		}
+	</script>
 	</body>
 </html>

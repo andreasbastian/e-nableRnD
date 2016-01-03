@@ -91,6 +91,7 @@ var HandLoader = (function(){
     return {
         loadHand : function(hand,size,cb){
             blobsForDownload = {};
+            partsLoaded = 0;
             handLoadedCallback = cb;
             var fileNames = generateFileNames(hand,size);
 
@@ -110,6 +111,46 @@ var HandLoader = (function(){
             loadKnuckles(fileNames.distal,15,offsetDistal,rotationDistal,"distal",completionCheck);
 
             return fileNames;
+        },
+        getFiles: function(successCallback,errorCallback){
+            // THREE.js sets the XHR "responseType" to "arraybuffer" (see STLLoader.js)
+            // To put these files in a zip archive we need blobs.
+            // Fortunately, support for 'new Blob()' is quite strong
+            // See http://caniuse.com/#search=Blob
+
+            // Only download those files > 1kb, since 404s will not result in errors via
+            // THREE.loader. Instead, just catch them here, as it should be obvious to the user
+            // that something is missing
+
+            var files = [],errors = [],elements = [
+                "palm", "distal", "proximal"
+            ];
+
+            function verifyElementAndAdd(elementName,arrayBuffers){
+                var niceElementName = elementName.charAt(0).toUpperCase() + elementName.slice(1);
+
+                if (arrayBuffers[elementName].byteLength > 1000) {
+                    files.push({
+                        name: niceElementName + "_" + specs.hand + "_" + specs.size + ".stl",
+                        blob: new Blob([arrayBuffers[elementName]], {type: "application/sla"})
+                    });
+                } else {
+                    errors.push("The "+niceElementName+" you requested could not be found");
+                }
+            }
+
+            // Add all the hand parts to the zip file
+            _.each(elements,function(element){
+                verifyElementAndAdd(element,blobsForDownload);
+            });
+
+            if (errors.length > 0 && errorCallback) {
+                errorCallback(errors);
+            }
+            if (files.length > 0 && successCallback) {
+                successCallback(files);
+            }
+            return files;
         }
     };
 
