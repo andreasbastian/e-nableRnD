@@ -95,20 +95,22 @@ var HandLoader = (function(){
             handLoadedCallback = cb;
             var fileNames = generateFileNames(hand,size);
 
+            var previewScaleFactor = size/100;
+
             // load palm
             var palmrotation = new THREE.Euler( -Math.PI / 2, Math.PI,Math.PI, 'XYZ' );
-            var offsetPalm = new THREE.Vector3(25,0,-120);
+            var offsetPalm = new THREE.Vector3(25*previewScaleFactor,0,-120*previewScaleFactor);
             loadPalm(fileNames.palm,offsetPalm,palmrotation,completionCheck);
 
             // load proximals
             var rotationProximal = new THREE.Euler( -Math.PI / 2, Math.PI,0, 'XYZ' );
             var offsetProximal = new THREE.Vector3(0,0,-10);
-            loadKnuckles(fileNames.proximal,15,offsetProximal,rotationProximal, "proximal",completionCheck);
+            loadKnuckles(fileNames.proximal,15*previewScaleFactor,offsetProximal,rotationProximal, "proximal",completionCheck);
 
             // load distals
             var rotationDistal = new THREE.Euler( Math.PI / 2, Math.PI , Math.PI / 2, 'XYZ' );
-            var offsetDistal = new THREE.Vector3(-3,0,10);
-            loadKnuckles(fileNames.distal,15,offsetDistal,rotationDistal,"distal",completionCheck);
+            var offsetDistal = new THREE.Vector3(-3,0,10*previewScaleFactor);
+            loadKnuckles(fileNames.distal,15*previewScaleFactor,offsetDistal,rotationDistal,"distal",completionCheck);
 
             return fileNames;
         },
