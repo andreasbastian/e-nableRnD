@@ -77,7 +77,7 @@ var HandLoader = (function(){
     }
 
     var partsLoaded = 0,
-        totalParts = 3
+        totalParts = 3,
         handLoadedCallback = function(){},
         completionCheck = function(){
             partsLoaded++;
