@@ -1,159 +1,84 @@
-var HandLoader = (function(){
-    var stlFileLocations = {
-        proximal: "../batch%20STL%20sizing/proximal%200.2mm/<%= hand %>_para_prox_<%= size %>.stl",
-        distal: "../batch%20STL%20sizing/distal/old/<%= hand %>_distal_scale_<%= size %>_percent.stl",
-        palm: "../batch%20STL%20sizing/<%= hand %>_palm/<%= hand %>_palm_<%= handName %>_<%= size %>.stl"
-    };
+var HandLoader = function(manifest){
+    if (!manifest || !manifest.parts) throw new Error("Expected a manifest with a parts array.");
 
-    var blobsForDownload = {
-        palm: "",
-        proximal: "",
-        distal: ""
-    };
+    function getParts(hand,size,design){
 
-    function generateFileNames(hand,size){
-        if (hand !== "RR" && hand !== "LL") throw new Error("Expected hand to be either RR or LL");
-        if (typeof size != "number" || size < 100 || size > 200) throw new Error("Expected size to be a number between 100 and 200")
 
-        var handParameters = {
-            size: size,
-            hand: hand,
-            handName: hand === "RR" ? "right" : "left"
-        };
+        if (hand !== "left" && hand !== "right") throw new Error("Expected hand to be either right or left");
+        if (typeof size != "number" || size < 100 || size > 200) throw new Error("Expected size to be a number between 100 and 200");
+        if (typeof design != "string") throw new Error("Expected design to be a string");
 
-        return {
-            proximal: _.template(stlFileLocations.proximal)(handParameters),
-            distal: _.template(stlFileLocations.distal)(handParameters),
-            palm: _.template(stlFileLocations.palm)(handParameters)
-        }
+        return _.filter(manifest["parts"],function(part){
+            return part["handedness"].indexOf(hand) > -1; // if "handedness" includes the specified handedness, it's included!
+        });
     }
 
-    function getMaterial(){
-        return new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
-    }
-
-    function loadPalm(filename,offset,rotation,cb){
+    function loadDisplayModel(hand,size,design,cb){
+        // This function assumes there's one display model which is scaled and mirrored for the user's benefit.
+        // This display model is NOT THE SAME as the files that are downloaded for printing.
         var loader = new THREE.STLLoader();
-        loader.load( filename, function ( geometry, data ) {
-            // Store for later download in a zip file. XHR is the only way to retrieve
-            // data from a url as a blob, and it's been done here anyways
-            blobsForDownload.palm = data;
+        loader.load( manifest["displayModel"], function ( geometry, data ) {
 
-            var mesh = new THREE.Mesh( geometry, getMaterial() );
-            mesh.rotation.set(rotation.x,rotation.y,rotation.z );
+            var material = new THREE.MeshPhongMaterial( { color: 0xff5533, specular: 0x111111, shininess: 200 } );
+            var mesh = new THREE.Mesh( geometry, material );
             mesh.castShadow = true;
             mesh.receiveShadow = true;
-            mesh.position.set(offset.x,offset.y,offset.z);
+
+            // Manipulate the mesh according to display pref's, specifically "hand" (if it needs to be mirrored) and
+            // "size" to zoom it with reference to a fixed grid
+            mesh.rotation.set(0,0,0 );
+            mesh.position.set(0,0,0);
+
             scene.add( mesh );
-
             if (cb) cb(data);
         } );
     }
-
-    function loadKnuckles(fileName,spacingX,offset,rotation,whichKnuckle,cb){
-        var loader = new THREE.STLLoader();
-        loader.load( fileName, function ( geometry, data ) {
-            // Store for later download in a zip file. XHR is the only way to retrieve
-            // data from a url as a blob, and it's been done here anyways
-            blobsForDownload[whichKnuckle] = data;
-
-            var mesh = new THREE.Mesh( geometry, getMaterial() );
-            mesh.rotation.set(rotation.x,rotation.y,rotation.z );
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-
-            // Don't add original
-            //scene.add( mesh );
-
-            // Duplicate the part and position each knuckle:
-            for (var i=0; i<4; i++) {
-                var proximalNext = mesh.clone();
-                proximalNext.position.set(spacingX*i + offset.x,offset.y,offset.z);
-                scene.add(proximalNext);
-            }
-
-            if (cb) cb(data);
-        } );
-    }
-
-    var partsLoaded = 0,
-        totalParts = 3,
-        handLoadedCallback = function(){},
-        completionCheck = function(){
-            partsLoaded++;
-            if (partsLoaded === totalParts){
-                handLoadedCallback(blobsForDownload)
-            } else {
-                // Still waiting for parts to come back
-            }
-        };
 
     return {
-        loadHand : function(hand,size,cb){
-            blobsForDownload = {};
-            partsLoaded = 0;
-            handLoadedCallback = cb;
-            var fileNames = generateFileNames(hand,size);
-
-            var previewScaleFactor = size/100;
-
-            // load palm
-            var palmrotation = new THREE.Euler( -Math.PI / 2, Math.PI,Math.PI, 'XYZ' );
-            var offsetPalm = new THREE.Vector3(25*previewScaleFactor,0,-120*previewScaleFactor);
-            loadPalm(fileNames.palm,offsetPalm,palmrotation,completionCheck);
-
-            // load proximals
-            var rotationProximal = new THREE.Euler( -Math.PI / 2, Math.PI,0, 'XYZ' );
-            var offsetProximal = new THREE.Vector3(0,0,-10);
-            loadKnuckles(fileNames.proximal,15*previewScaleFactor,offsetProximal,rotationProximal, "proximal",completionCheck);
-
-            // load distals
-            var rotationDistal = new THREE.Euler( Math.PI / 2, Math.PI , Math.PI / 2, 'XYZ' );
-            var offsetDistal = new THREE.Vector3(-3,0,10*previewScaleFactor);
-            loadKnuckles(fileNames.distal,15*previewScaleFactor,offsetDistal,rotationDistal,"distal",completionCheck);
-
-            return fileNames;
+        loadDisplayHand : function(hand,size,design,cb){
+            loadDisplayModel(hand,size,design,cb);
         },
-        getFiles: function(successCallback,errorCallback){
-            // THREE.js sets the XHR "responseType" to "arraybuffer" (see STLLoader.js)
-            // To put these files in a zip archive we need blobs.
-            // Fortunately, support for 'new Blob()' is quite strong
-            // See http://caniuse.com/#search=Blob
+        getFiles: function(hand,size,design,successCallback,errorCallback){
+            var parts = getParts(hand,size,design);
+            var files = [];
+            var completedDownloads = 0;
 
-            // Only download those files > 1kb, since 404s will not result in errors via
-            // THREE.loader. Instead, just catch them here, as it should be obvious to the user
-            // that something is missing
+            // Trigger a download of each part via xhr, specifying blob type
+            _.each(parts,function(p){
 
-            var files = [],errors = [],elements = [
-                "palm", "distal", "proximal"
-            ];
+                (function(){
+                    var partfilename = _.template(p.file_name_template)({handedness:hand,size:size,designName:design});
+                    var partDirname = _.template(p.file_dir_template)({handedness:hand,size:size,designName:design});
 
-            function verifyElementAndAdd(elementName,arrayBuffers){
-                var niceElementName = elementName.charAt(0).toUpperCase() + elementName.slice(1);
+                    // Wrap xhr in anonymous function to guarantee xhr variable has its own scope for each download
+                    var xhr = new XMLHttpRequest();
+                    xhr.addEventListener('load', function(){
 
-                if (arrayBuffers[elementName].byteLength > 1000) {
-                    files.push({
-                        name: niceElementName + "_" + specs.hand + "_" + specs.size + ".stl",
-                        blob: new Blob([arrayBuffers[elementName]], {type: "application/sla"})
+                        if (xhr.status == 200){
+                            //Do something with xhr.response (not responseText), which should be a Blob
+                            files.push({
+                                name: partfilename,
+                                blob: xhr.response
+                                //                            blob: new Blob([arrayBuffers[elementName]], {type: "application/sla"})
+                            });
+                        } else {
+                            // Error encountered!
+                            errorCallback(p.name);
+                        }
+
+                        completedDownloads += 1;
+
+                        if (completedDownloads == parts.length) {
+                            successCallback(files);
+                        }
                     });
-                } else {
-                    errors.push("The "+niceElementName+" you requested could not be found");
-                }
-            }
 
-            // Add all the hand parts to the zip file
-            _.each(elements,function(element){
-                verifyElementAndAdd(element,blobsForDownload);
+                    xhr.open('GET', partDirname + partfilename);
+                    xhr.responseType = 'blob';
+                    xhr.send(null);
+                })();
             });
-
-            if (errors.length > 0 && errorCallback) {
-                errorCallback(errors);
-            }
-            if (files.length > 0 && successCallback) {
-                successCallback(files);
-            }
-            return files;
         }
     };
 
-})();
+};

@@ -70,7 +70,7 @@
             "name": "thumb pin",
             "handedness": "left right",
             "file_dir_template": "../batch%20STL%20sizing/LimbForge/<%= designName %>_thumb_pin/",
-            "file_name_template": "<%= designName %>_thumb_pin.stl"
+            "file_name_template": "<%= designName %>_thumb_pin_<%= size %>_percent.stl"
         },
         {
             "qty": 2,
